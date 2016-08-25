@@ -19,7 +19,6 @@ type Cron struct {
 	remove   chan EntryID
 	snapshot chan []Entry
 	running  bool
-	nextID   EntryID
 	ErrorLog *log.Logger
 	location *time.Location
 }
@@ -106,24 +105,23 @@ type FuncJob func()
 func (f FuncJob) Run() { f() }
 
 // AddFunc adds a func to the Cron to be run on the given schedule.
-func (c *Cron) AddFunc(spec string, cmd func()) (EntryID, error) {
-	return c.AddJob(spec, FuncJob(cmd))
+func (c *Cron) AddFunc(spec string, cmd func(), entryID EntryID) (EntryID, error) {
+	return c.AddJob(spec, FuncJob(cmd), entryID)
 }
 
 // AddJob adds a Job to the Cron to be run on the given schedule.
-func (c *Cron) AddJob(spec string, cmd Job) (EntryID, error) {
+func (c *Cron) AddJob(spec string, cmd Job, entryID EntryID) (EntryID, error) {
 	schedule, err := Parse(spec)
 	if err != nil {
 		return 0, err
 	}
-	return c.Schedule(schedule, cmd), nil
+	return c.Schedule(schedule, cmd, entryID), nil
 }
 
 // Schedule adds a Job to the Cron to be run on the given schedule.
-func (c *Cron) Schedule(schedule Schedule, cmd Job) EntryID {
-	c.nextID++
+func (c *Cron) Schedule(schedule Schedule, cmd Job, entryID EntryID) EntryID {
 	entry := &Entry{
-		ID:       c.nextID,
+		ID:       entryID,
 		Schedule: schedule,
 		Job:      cmd,
 	}
