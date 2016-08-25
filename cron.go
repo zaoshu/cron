@@ -17,9 +17,9 @@ type Cron struct {
 	stop     chan struct{}
 	add      chan *Entry
 	remove   chan EntryID
-	snapshot chan []*Entry
+	snapshot chan []Entry
 	running  bool
-	nextID   bool
+	nextID   EntryID
 	ErrorLog *log.Logger
 	location *time.Location
 }
@@ -92,7 +92,7 @@ func NewWithLocation(location *time.Location) *Cron {
 		entries:  nil,
 		add:      make(chan *Entry),
 		stop:     make(chan struct{}),
-		snapshot: make(chan []*Entry),
+		snapshot: make(chan []Entry),
 		remove:   make(chan EntryID),
 		running:  false,
 		ErrorLog: nil,
